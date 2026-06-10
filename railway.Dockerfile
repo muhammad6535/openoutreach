@@ -8,6 +8,8 @@ RUN pip install --no-cache-dir gunicorn psycopg2-binary whitenoise
 
 COPY linkedin/llm.py /app/linkedin/llm.py
 COPY linkedin/browser/launch.py /app/linkedin/browser/launch.py
+COPY railway/patched_login.py /tmp/patched_login.py
+RUN cp /tmp/patched_login.py "$(python -c "import linkedin_cli, os; print(os.path.dirname(linkedin_cli.__file__))")/browser/login.py" && rm /tmp/patched_login.py
 COPY linkedin/django_settings.py /app/linkedin/django_settings.py
 COPY linkedin/admin.py /app/linkedin/admin.py
 COPY linkedin/urls.py /app/linkedin/urls.py
