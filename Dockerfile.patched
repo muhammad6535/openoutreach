@@ -1,0 +1,2 @@
+FROM ghcr.io/eracle/openoutreach:latest
+COPY linkedin/llm.py /app/linkedin/llm.py

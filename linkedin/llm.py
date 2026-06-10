@@ -133,6 +133,14 @@ def _build_cohere(cfg):
 def _build_openai_compatible(cfg):
     if not cfg.llm_api_base:
         raise ValueError("LLM_API_BASE is required for the openai_compatible provider.")
+    from openai.resources.chat.completions import AsyncCompletions
+    _orig_create = AsyncCompletions.create
+
+    async def _patched_create(self, *args, **kwargs):
+        kwargs.pop("tool_choice", None)
+        return await _orig_create(self, *args, **kwargs)
+
+    AsyncCompletions.create = _patched_create
     from pydantic_ai.models.openai import OpenAIModel
     from pydantic_ai.providers.openai import OpenAIProvider
     return OpenAIModel(cfg.ai_model, provider=OpenAIProvider(
