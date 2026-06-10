@@ -43,7 +43,7 @@ def start_browser_session(session):
     from linkedin_cli.conf import BROWSER_SLOW_MO, BROWSER_DEFAULT_TIMEOUT_MS
     pw = sync_playwright().start()
     browser = pw.chromium.launch(
-        headless=True,
+        headless=False,
         slow_mo=BROWSER_SLOW_MO,
         args=[
             "--disable-gpu",
