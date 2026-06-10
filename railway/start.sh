@@ -29,10 +29,11 @@ else:
 fi
 
 python manage.py shell -c "
-from linkedin.models import SiteConfig
+from linkedin.models import SiteConfig, LinkedInProfile, Campaign, SearchKeyword
+import os
+# SiteConfig
 cfg = SiteConfig.load()
 changed = False
-import os
 for env_key, cfg_key in [('RAILWAY_LLM_PROVIDER','llm_provider'),('RAILWAY_LLM_API_KEY','llm_api_key'),('RAILWAY_AI_MODEL','ai_model'),('RAILWAY_LLM_API_BASE','llm_api_base')]:
     val = os.environ.get(env_key)
     if val and getattr(cfg, cfg_key) != val:
@@ -43,6 +44,26 @@ if changed:
     print('SiteConfig updated from env')
 else:
     print('SiteConfig unchanged')
+# LinkedIn Profile from env
+username = os.environ.get('RAILWAY_LINKEDIN_USERNAME')
+password = os.environ.get('RAILWAY_LINKEDIN_PASSWORD')
+if username and password:
+    if not LinkedInProfile.objects.filter(username=username).exists():
+        LinkedInProfile.objects.create(username=username, password=password, active=True)
+        print('LinkedIn Profile created')
+    else:
+        print('LinkedIn Profile exists')
+# Campaign
+if not Campaign.objects.filter(is_freemium=False).exists():
+    Campaign.objects.create(name='FAANG Outreach', is_freemium=False, daily_connect_limit=20, max_connections_per_campaign=300, active_hours_start='09:00', active_hours_end='17:00', active_timezone='America/New_York')
+    print('Campaign created')
+else:
+    print('Campaign exists')
+# Search Keywords
+keywords = ['Google', 'Amazon', 'Apple', 'Netflix', 'Meta', 'Facebook', 'FAANG', 'HR', 'talent acquisition']
+for kw in keywords:
+    SearchKeyword.objects.get_or_create(keyword=kw)
+print(f'{SearchKeyword.objects.count()} search keywords')
 " 2>&1
 
 DJANGO_SETTINGS_MODULE=linkedin.django_settings python manage.py collectstatic --no-input 2>&1
