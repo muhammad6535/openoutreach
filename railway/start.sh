@@ -15,6 +15,7 @@ cd /app
 
 python manage.py migrate --no-input
 python manage.py setup_crm
+chown -R ubuntu:ubuntu /app/data 2>/dev/null || true
 
 if [ -n "${RAILWAY_ADMIN_USER:-}" ] && [ -n "${RAILWAY_ADMIN_PASS:-}" ]; then
     python manage.py shell -c "
