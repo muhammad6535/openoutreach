@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends supervisor && r
 RUN pip install --no-cache-dir gunicorn psycopg2-binary whitenoise
 
 COPY linkedin/llm.py /app/linkedin/llm.py
+COPY linkedin/browser/launch.py /app/linkedin/browser/launch.py
 COPY linkedin/django_settings.py /app/linkedin/django_settings.py
 COPY linkedin/admin.py /app/linkedin/admin.py
 COPY linkedin/urls.py /app/linkedin/urls.py

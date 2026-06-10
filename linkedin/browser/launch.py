@@ -13,7 +13,7 @@ import logging
 from termcolor import colored
 
 from linkedin_cli.auth import authenticate
-from linkedin_cli.browser.login import dismiss_comply_gate, launch_browser
+from linkedin_cli.browser.login import dismiss_comply_gate
 from linkedin_cli.browser.nav import goto_page
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,26 @@ def start_browser_session(session):
     if storage_state:
         logger.info("Loading saved session for %s", session)
 
-    session.page, session.context, session.browser, session.playwright = launch_browser(storage_state=storage_state)
+    from playwright.sync_api import sync_playwright
+    from playwright_stealth import Stealth
+    from linkedin_cli.conf import BROWSER_SLOW_MO, BROWSER_DEFAULT_TIMEOUT_MS
+    pw = sync_playwright().start()
+    browser = pw.chromium.launch(
+        headless=False,
+        slow_mo=BROWSER_SLOW_MO,
+        args=[
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--disable-software-rasterizer",
+            "--no-sandbox",
+        ],
+    )
+    context = browser.new_context(storage_state=storage_state)
+    context.set_default_timeout(BROWSER_DEFAULT_TIMEOUT_MS)
+    context.set_default_navigation_timeout(BROWSER_DEFAULT_TIMEOUT_MS)
+    Stealth().apply_stealth_sync(context)
+    page = context.new_page()
+    session.page, session.context, session.browser, session.playwright = page, context, browser, pw
 
     if not storage_state:
         lp = session.linkedin_profile
