@@ -42,14 +42,17 @@ def start_browser_session(session):
     from playwright_stealth import Stealth
     from linkedin_cli.conf import BROWSER_SLOW_MO, BROWSER_DEFAULT_TIMEOUT_MS
     pw = sync_playwright().start()
+    import os
+    os.environ.setdefault("CHROME_CRASHPAD_HANDLER_PATH", "/dev/null")
     browser = pw.chromium.launch(
-        headless=False,
+        headless=True,
         slow_mo=BROWSER_SLOW_MO,
         args=[
             "--disable-gpu",
             "--disable-dev-shm-usage",
             "--disable-software-rasterizer",
             "--no-sandbox",
+            "--single-process",
         ],
     )
     context = browser.new_context(storage_state=storage_state)
