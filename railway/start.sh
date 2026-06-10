@@ -62,6 +62,10 @@ if not camp:
     print('Campaign created')
 else:
     print('Campaign exists')
+# Assign campaign to admin users
+for u in User.objects.filter(is_superuser=True):
+    camp.users.add(u)
+print(f'Campaign assigned to {camp.users.count()} users')
 # Search Keywords
 keywords = ['Google', 'Amazon', 'Apple', 'Netflix', 'Meta', 'Facebook', 'FAANG', 'HR', 'talent acquisition', 'recruiter', 'engineering manager', 'software engineer']
 for kw in keywords:
