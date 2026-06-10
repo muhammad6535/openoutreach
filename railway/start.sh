@@ -45,25 +45,28 @@ if changed:
 else:
     print('SiteConfig unchanged')
 # LinkedIn Profile from env
-username = os.environ.get('RAILWAY_LINKEDIN_USERNAME')
-password = os.environ.get('RAILWAY_LINKEDIN_PASSWORD')
-if username and password:
-    if not LinkedInProfile.objects.filter(username=username).exists():
-        LinkedInProfile.objects.create(username=username, password=password, active=True)
+from django.contrib.auth.models import User
+li_email = os.environ.get('RAILWAY_LINKEDIN_USERNAME')
+li_pass = os.environ.get('RAILWAY_LINKEDIN_PASSWORD')
+if li_email and li_pass:
+    admin_user = User.objects.filter(is_superuser=True).first()
+    if admin_user and not LinkedInProfile.objects.filter(linkedin_username=li_email).exists():
+        LinkedInProfile.objects.create(user=admin_user, linkedin_username=li_email, linkedin_password=li_pass, active=True, legal_accepted=True)
         print('LinkedIn Profile created')
     else:
-        print('LinkedIn Profile exists')
+        print('LinkedIn Profile exists or no admin user')
 # Campaign
-if not Campaign.objects.filter(is_freemium=False).exists():
-    Campaign.objects.create(name='FAANG Outreach', is_freemium=False, daily_connect_limit=20, max_connections_per_campaign=300, active_hours_start='09:00', active_hours_end='17:00', active_timezone='America/New_York')
+camp = Campaign.objects.filter(is_freemium=False).first()
+if not camp:
+    camp = Campaign.objects.create(name='FAANG Outreach', is_freemium=False)
     print('Campaign created')
 else:
     print('Campaign exists')
 # Search Keywords
-keywords = ['Google', 'Amazon', 'Apple', 'Netflix', 'Meta', 'Facebook', 'FAANG', 'HR', 'talent acquisition']
+keywords = ['Google', 'Amazon', 'Apple', 'Netflix', 'Meta', 'Facebook', 'FAANG', 'HR', 'talent acquisition', 'recruiter', 'engineering manager', 'software engineer']
 for kw in keywords:
-    SearchKeyword.objects.get_or_create(keyword=kw)
-print(f'{SearchKeyword.objects.count()} search keywords')
+    SearchKeyword.objects.get_or_create(campaign=camp, keyword=kw)
+print(f'{SearchKeyword.objects.filter(campaign=camp).count()} search keywords')
 " 2>&1
 
 DJANGO_SETTINGS_MODULE=linkedin.django_settings python manage.py collectstatic --no-input 2>&1
